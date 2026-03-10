@@ -1,0 +1,60 @@
+{
+  "bar": {
+    "tooltip-empty": "Keine USB-Geräte",
+    "tooltip-count": "%1 Gerät(e) eingehängt"
+  },
+  "panel": {
+    "title": "USB-Geräte",
+    "mounted": "eingehängt",
+    "refresh": "Aktualisieren",
+    "empty": "Keine USB-Geräte erkannt",
+    "empty-hint": "Schließe einen USB-Stick an, um loszulegen",
+    "unmount-all": "Alle aushängen",
+    "eject-all": "Alle auswerfen"
+  },
+  "device": {
+    "mounted": "Eingehängt",
+    "used": "belegt",
+    "free": "frei",
+    "action-open": "Öffnen",
+    "action-mount": "Einhängen",
+    "action-unmount": "Aushängen",
+    "action-eject": "Sicher entfernen",
+    "action-copy-path": "Pfad kopieren"
+  },
+  "context": {
+    "open": "USB-Manager öffnen",
+    "refresh": "Geräte aktualisieren",
+    "unmount-all": "Alle aushängen",
+    "settings": "Einstellungen"
+  },
+  "notifications": {
+    "mounted": "Eingehängt",
+    "unmounted": "Ausgehängt",
+    "ejected": "Sicher entfernt",
+    "mount-failed": "Einhängen fehlgeschlagen",
+    "unmount-failed": "Aushängen fehlgeschlagen",
+    "eject-failed": "Auswerfen fehlgeschlagen",
+    "unmount-all": "Alle Geräte ausgehängt",
+    "eject-all": "Alle Geräte ausgeworfen",
+    "path-copied": "Pfad kopiert"
+  },
+  "settings": {
+    "section-bar": "Bar-Widget",
+    "hide-when-empty": "Ausblenden wenn leer",
+    "hide-when-empty-desc": "Bar-Icon ausblenden, wenn keine USB-Geräte angeschlossen sind",
+    "icon-color": "Icon-Farbe",
+    "icon-color-desc": "Benutzerdefinierte Icon-Farbe (leer lassen für Standard)",
+    "section-behavior": "Verhalten",
+    "auto-mount": "Automatisch einhängen",
+    "auto-mount-desc": "USB-Laufwerke automatisch einhängen, wenn sie angeschlossen werden",
+    "notifications": "Benachrichtigungen",
+    "notifications-desc": "Toast-Benachrichtigungen bei Einhänge-/Aushänge-/Auswurf-Ereignissen anzeigen",
+    "section-browser": "Dateimanager",
+    "file-browser": "Dateimanager-Befehl",
+    "file-browser-desc": "Befehl zum Öffnen des Dateimanagers (z.B. xdg-open, dolphin, thunar, nautilus)",
+    "presets": "Voreinstellungen:",
+    "section-requirements": "Systemvoraussetzungen",
+    "requirements-desc": "Folgende Tools müssen installiert sein:"
+  }
+}
