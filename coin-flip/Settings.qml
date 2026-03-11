@@ -7,5 +7,4 @@ Column {
     spacing: 10
 
     NText { text: "Not yet implemented" }
-    // добавить выбор ответа
 }

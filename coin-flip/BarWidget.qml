@@ -1,5 +1,4 @@
 import QtQuick
-
 import Quickshell
 import qs.Commons
 import qs.Services.UI
@@ -23,54 +22,25 @@ NIconButton {
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
-    // центр трансформации (чтобы масштаб происходил из центра кнопки)
     transformOrigin: Item.Center
-
-    // Анимация масштаба через Behavior на свойстве scale (надёжно)
-    Behavior on scale {
-        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
-    }
+    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
 
     onClicked: {
-        // подпрыгивание: увеличиваем scale, затем таймер вернёт обратно
-        root.scale = 1.25
+        // bounce effect
+        root.scale = 1.2
         bounceBack.start()
 
-        // бросок монетки
-        var result = Math.random() < 0.5 ? pluginApi?.tr("common.heads") : pluginApi?.tr("common.tails")
-        if (pluginApi) {
-            pluginApi.pluginSettings.lastResult = result
-            pluginApi.saveSettings()
+        // open panel
+        if (pluginApi && pluginApi.openPanel) {
+            pluginApi.openPanel(root.screen, root)
         }
-
-        ToastService.showNotice(result)
     }
 
     Timer {
         id: bounceBack
-        interval: 150
+        interval: 100
         running: false
         repeat: false
-        onTriggered: {
-            root.scale = 1.0
-        }
-    }
-
-    NPopupContextMenu {
-        id: contextMenu
-        model: [
-            { "label": pluginApi?.tr("menu.settings"), "action": "settings", "icon": "settings" },
-        ]
-        onTriggered: function(action) {
-            contextMenu.close();
-            PanelService.closeContextMenu(screen);
-            if (action === "settings") {
-                BarService.openPluginSettings(screen, pluginApi.manifest);
-            }
-        }
-    }
-
-    onRightClicked: {
-        PanelService.showContextMenu(contextMenu, root, screen);
+        onTriggered: { root.scale = 1.0 }
     }
 }
