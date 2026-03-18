@@ -153,7 +153,7 @@ Do NOT commit registry.json in your Pull Requests as it is automatically regener
 
 ## AI Development
 
-AI tools should reference the following [file](./AGENTS.md)
+If using AI tools to contribute, see [AGENTS.md](./AGENTS.md) for plugin patterns and guidelines.
 
 ## License
 

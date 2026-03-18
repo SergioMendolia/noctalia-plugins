@@ -1,363 +1,382 @@
 # AI-Assisted Development Guidelines
 
-This document outlines standards and best practices for maintaining code quality when using AI tools and agents to contribute to the Noctalia Plugins repository.
+Guidelines for AI tools contributing to the Noctalia Plugins repository. **Study the official plugins before writing code** — especially `hello-world` (minimal reference) and `timer` (complex example with shared state). Official plugins have `"official": true` in their manifest.
 
-## Table of Contents
+## Plugin API
 
-1. [Code Quality Standards](#code-quality-standards)
-2. [AI-Generated Code Review Checklist](#ai-generated-code-review-checklist)
-3. [QML-Specific Guidelines](#qml-specific-guidelines)
-4. [Testing Requirements](#testing-requirements)
-5. [Documentation Standards](#documentation-standards)
-6. [Performance Considerations](#performance-considerations)
-7. [Security Considerations](#security-considerations)
-8. [Pull Request Requirements](#pull-request-requirements)
+Every plugin component receives a `pluginApi` property. This is the core interface:
 
-## Code Quality Standards
+```qml
+Item {
+  property var pluginApi: null
 
-### General Requirements
+  // Settings access pattern — always use this fallback chain
+  property var cfg: pluginApi?.pluginSettings || ({})
+  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  property string message: cfg.message ?? defaults.message ?? "fallback"
+}
+```
 
-- **No Copy-Paste Anti-patterns**: Avoid duplicated code. Extract common functionality into reusable components
-- **Naming Conventions**: Use camelCase for variables and functions, PascalCase for classes and components
-- **Comments**: Include meaningful comments for complex logic; avoid obvious or redundant comments
-- **File Organization**: Keep files organized by feature/plugin with clear separation of concerns
+**Key pluginApi members:**
+- `pluginSettings` — mutable settings object, persisted via `saveSettings()`
+- `manifest` — read-only manifest.json data
+- `pluginId`, `pluginDir` — plugin identity and path
+- `mainInstance` — reference to Main.qml instance (for shared state)
+- `tr(key, interpolations)` — translate a key, e.g. `pluginApi?.tr("widget.label")`
+- `trp(key, count, singular, plural)` — plural translation
+- `openPanel(screen, widget)`, `togglePanel(screen, widget)` — panel control
+- `saveSettings()` — persist `pluginSettings` to disk
+- `withCurrentScreen(callback)` — get current screen in IPC handlers
+- `panelOpenScreen` — the screen where this plugin's panel is open
 
-### Complexity Limits
+## Entry Points
 
-- Component files should focus on a single responsibility
-- Property bindings should be simple; complex logic belongs in functions
-- Use the `Main.qml` file as a singleton for functionality that needs to be shared
+Only include the entry points your plugin uses. Available types:
 
-## AI-Generated Code Review Checklist
+| Entry Point | File | Purpose |
+|---|---|---|
+| `main` | Main.qml | Shared state, IPC handlers |
+| `barWidget` | BarWidget.qml | Bar widget |
+| `panel` | Panel.qml | Overlay panel |
+| `controlCenterWidget` | ControlCenterWidget.qml | Control center button |
+| `settings` | Settings.qml | Plugin settings UI |
+| `desktopWidget` | DesktopWidget.qml | Draggable desktop widget |
+| `desktopWidgetSettings` | DesktopWidgetSettings.qml | Desktop widget settings |
+| `launcherProvider` | LauncherProvider.qml | Launcher search provider |
 
-### ✓ Before Submitting a PR
+## Component Patterns
 
-- [ ] **No Hallucinated Functions**: Verify all functions actually exist in imported libraries
-- [ ] **Type Safety**: Ensure all variables have appropriate types (for typed QML)
-- [ ] **Property Bindings**: Check for circular bindings or unnecessary re-evaluations
-- [ ] **Error Handling**: Verify error cases are handled appropriately
-- [ ] **Resource Cleanup**: Ensure proper cleanup of timers, connections, and other resources
-- [ ] **Dependencies**: Verify all required imports are included
-- [ ] **Deprecated APIs**: Do not use deprecated Qt/QML APIs
-- [ ] **No Placeholder Code**: Remove debug statements, TODOs, and placeholder implementations
-- [ ] **Licensing**: Ensure code complies with the project license (check existing plugin licenses)
-
-### ✓ Code Logic Verification
-
-- [ ] **Boundary Conditions**: Test edge cases (empty lists, null values, zero/negative numbers)
-- [ ] **Signal/Slot Connections**: Verify connections are properly established and disconnected
-- [ ] **State Management**: Check that component state is properly managed and updated
-- [ ] **Synchronous vs Asynchronous**: Confirm appropriate use of async operations
-- [ ] **File Operations**: Verify all file reads/writes have error handling
-
-### ✓ Performance & Resources
-
-- [ ] **Memory Leaks**: Check for objects that won't be garbage collected
-- [ ] **Rendering Performance**: Avoid excessive re-renders or expensive calculations in bindings
-- [ ] **API Calls**: Batch requests where possible; implement proper rate limiting
-- [ ] **Disk I/O**: Minimize blocking disk operations; use asynchronous alternatives
-
-## QML-Specific Guidelines
-
-### Component Structure
+### Main.qml — Shared State
 
 ```qml
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
+import qs.Commons
 
-Rectangle {
+Item {
+  id: root
+  property var pluginApi: null
+
+  // Shared state accessible from other components via pluginApi.mainInstance
+  property bool isActive: false
+
+  // IPC handler for CLI control (qs ipc call plugin:my-plugin commandName)
+  IpcHandler {
+    target: "plugin:my-plugin"
+
+    function toggle() {
+      if (pluginApi) {
+        pluginApi.withCurrentScreen(screen => {
+          pluginApi.togglePanel(screen);
+        });
+      }
+    }
+  }
+}
+```
+
+### BarWidget.qml
+
+```qml
+import Quickshell
+import qs.Commons
+import qs.Services.UI
+import qs.Widgets
+
+Item {
   id: root
 
-  // Properties first
-  required property string title
-  property int itemCount: 0
+  // Injected properties
+  property var pluginApi: null
+  property ShellScreen screen
+  property string widgetId: ""
+  property string section: ""
+  property int sectionWidgetIndex: -1
+  property int sectionWidgetsCount: 0
 
-  // Signals
-  signal itemClicked(int index)
+  // Settings
+  property var cfg: pluginApi?.pluginSettings || ({})
+  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  // Child components
-  ColumnLayout {
-    // Layout content
-  }
+  // Bar layout awareness
+  readonly property string barPosition: Settings.getBarPositionForScreen(screen?.name)
+  readonly property bool isVertical: barPosition === "left" || barPosition === "right"
+  readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screen?.name)
 
-  // Functions
-  function handleClick(index) {
-    // Implementation
-  }
-}
-```
+  implicitWidth: isVertical ? capsuleHeight : contentWidth
+  implicitHeight: isVertical ? contentHeight : capsuleHeight
 
-### Property Binding Best Practices
-
-- ✓ **Good**: `color: isActive ? "blue" : "gray"`
-- ✗ **Bad**: `color: { calculateColorBasedOnMultipleConditions() }`
-- Keep bindings simple and readable
-- Avoid function calls in bindings unless necessary
-- Use `Component.onCompleted` for initialization logic
-
-### Translations
-
-Use translations instead of hardcoded labels.
-
-- ✓ **Good**: `pluginApi?.tr("example.key")`
-- ✗ **Bad**: `Hardcoded Label`
-
-```qml
-NLabel {
-  label: pluginApi?.tr("example.label")
-}
-```
-
-### Components
-
-Preferably use Noctalias own components that can be found [here](https://github.com/noctalia-dev/noctalia-shell/tree/main/Widgets). That way the plugin follows the correct color scheme!
-
-- ✓ **Good**: `NLabel {}`
-- ✗ **Bad**: `Text {}`
-
-### Signal Handling
-
-```qml
-Connections {
-    target: someObject
-    function onSomeSignal(arg) {
-        // Handle signal
+  // Context menu (right-click)
+  NPopupContextMenu {
+    id: contextMenu
+    model: [
+      { "label": pluginApi?.tr("menu.settings"), "action": "settings", "icon": "settings" }
+    ]
+    onTriggered: action => {
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
+      if (action === "settings") {
+        BarService.openPluginSettings(screen, pluginApi.manifest);
+      }
     }
-}
+  }
 
-// Clean up in Component.onDestruction
-Component.onDestruction: {
-    someConnection.destroy()
+  MouseArea {
+    anchors.fill: parent
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
+    onClicked: mouse => {
+      if (mouse.button === Qt.LeftButton) {
+        if (pluginApi) pluginApi.togglePanel(root.screen, root);
+      } else if (mouse.button === Qt.RightButton) {
+        PanelService.showContextMenu(contextMenu, root, screen);
+      }
+    }
+  }
 }
 ```
 
-### Anchoring vs Layouts
+### Panel.qml
 
-- Use `Anchors` for simple, direct positioning
-- Use `Layout` components for complex, responsive layouts
-- Do not mix anchoring and layout management in the same container
+```qml
+import QtQuick
+import QtQuick.Layouts
+import qs.Commons
+import qs.Services.UI
+import qs.Widgets
 
-## Testing Requirements
+Item {
+  id: root
+  property var pluginApi: null
 
-### Manual Testing
+  // Required for background rendering
+  readonly property var geometryPlaceholder: panelContainer
 
-- [ ] Test on target device/emulator
-- [ ] Verify all interactive elements work correctly
-- [ ] Check responsive behavior at different screen sizes
-- [ ] Test with both light and dark themes (if applicable)
-- [ ] Verify accessibility features work
+  // Panel dimensions (always scale with uiScaleRatio)
+  property real contentPreferredWidth: 400 * Style.uiScaleRatio
+  property real contentPreferredHeight: 500 * Style.uiScaleRatio
 
-### Automated Testing (if applicable)
+  // Enable panel attach/detach UI
+  readonly property bool allowAttach: true
 
-- [ ] Unit tests for business logic
-- [ ] Integration tests for component interactions
-- [ ] Performance tests for CPU-heavy operations
+  anchors.fill: parent
 
-## Documentation Standards
+  Rectangle {
+    id: panelContainer
+    anchors.fill: parent
+    color: "transparent"
 
-### Plugin Metadata
+    ColumnLayout {
+      anchors.fill: parent
+      anchors.margins: Style.marginL
+      spacing: Style.marginL
 
-Every plugin should include the correct manifest file:
+      // Panel content using N* widgets
+    }
+  }
+}
+```
+
+### Settings.qml
+
+```qml
+import QtQuick
+import QtQuick.Layouts
+import qs.Commons
+import qs.Widgets
+
+ColumnLayout {
+  id: root
+  property var pluginApi: null
+
+  property var cfg: pluginApi?.pluginSettings || ({})
+  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+
+  // Edit copies of settings (don't modify pluginSettings directly in bindings)
+  property string editMessage: cfg.message ?? defaults.message ?? ""
+
+  spacing: Style.marginL
+
+  NTextInput {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.message.label")
+    description: pluginApi?.tr("settings.message.desc")
+    text: root.editMessage
+    onTextChanged: root.editMessage = text
+  }
+
+  // Required — called by the shell when user saves
+  function saveSettings() {
+    if (!pluginApi) return;
+    pluginApi.pluginSettings.message = root.editMessage;
+    pluginApi.saveSettings();
+  }
+}
+```
+
+### ControlCenterWidget.qml
+
+```qml
+import Quickshell
+import qs.Widgets
+
+NIconButtonHot {
+  property ShellScreen screen
+  property var pluginApi: null
+
+  icon: "my-icon"
+  tooltipText: pluginApi?.tr("widget.tooltip")
+  onClicked: {
+    if (pluginApi) pluginApi.togglePanel(screen, this);
+  }
+}
+```
+
+## manifest.json
 
 ```json
 {
-  "id": "plugin-name",
-  "name": "Human Readable Title",
+  "id": "my-plugin",
+  "name": "My Plugin",
   "version": "1.0.0",
-  "minNoctaliaVersion": "3.6.0",
+  "minNoctaliaVersion": "4.4.1",
   "author": "Author Name",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
-  "description": "Clear, concise description of what the plugin does",
-  "tags": ["tag1", "tag2"],
+  "description": "Concise description of what the plugin does",
+  "tags": ["Bar", "Panel"],
   "entryPoints": {
-    "main": "Main.qml"
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml"
   },
-  "dependencies": [],
+  "dependencies": {
+    "plugins": []
+  },
   "metadata": {
-    "defaultSettings": {}
+    "defaultSettings": {
+      "message": "Hello",
+      "iconColor": "none"
+    }
   }
 }
 ```
 
-#### id
+**Field rules:**
+- `id` must match the folder name
+- `version` starts at `1.0.0`; bump appropriately on updates
+- `minNoctaliaVersion` — verify the features you use exist in that version
+- `repository` — always `https://github.com/noctalia-dev/noctalia-plugins` for PRs to this repo
+- `tags` — use only tags from [README.md](./README.md#tags); include compositor tags if compositor-specific
+- `entryPoints` — only include the ones your plugin provides
+- `metadata.defaultSettings` — must contain defaults for every setting your plugin uses
 
-The id should be the same value as the folder.
+## Translations
 
-#### name
+Plugin translations live in `i18n/*.json` (one file per language):
 
-This is a human readable name to be displayed for users to see.
-
-#### version
-
-Start with version 1.0.0. If this plugin already exists, with every update bump the version up a number based on the changes made.
-
-#### minNoctaliaVersion
-
-The minimum version of Noctalia that this plugin can run on. Some features have been implemented in later version, always check that this is correct!
-
-#### author
-
-The name / username of the author.
-
-#### license
-
-The license this specific plugin is licensed under.
-
-#### repository
-
-The repository that this plugin exists in. When submitting a PR for the noctalia-plugins repository always have it to the github url for the noctalia-plugins repository.
-
-#### description
-
-A helpful and concise description about what the plugin does.
-
-#### tags
-
-The available tags you can find in the README.md file of this repository. ONLY use one of those. Use helpful tags that describe this plugin. Use also specific compositor tags if the plugin can only be used for some / one specific compositor.
-
-#### entryPoints
-
-The available entryPoints to this plugin. Look at the specific documentation to check what entryPoints exist!
-
-#### dependencies
-
-This is a list of plugin dependencies. If the plugin depends on another specific plugin.
-
-#### metadata
-
-The metadata of this plugin. Look at the documentation to find out what can be in here!
-
-### Code Comments
-
-- Document **why**, not **what** (code shows the what)
-- Explain non-obvious design decisions
-- Include parameter descriptions for complex functions
-- Add examples for unusual usage patterns
-
-### README Files
-
-Plugin README should include:
-
-- Title
-- Brief description
-- Features list
-- Installation instructions
-- Usage examples
-- Configuration options
-- Known limitations
-
-## Performance Considerations
-
-### Avoid
-
-- Polling-based state checks (use signals/bindings instead)
-- Creating objects in high-frequency code paths
-- Binding to expensive calculations
-- Loading large files synchronously
-- Holding references to QML objects without cleanup
-
-### Optimize
-
-- Use lazy loading for heavy components (use the `Loader` component)
-- Debounce/throttle frequent updates (use the `Timer` component)
-- Cache computed values when appropriate
-
-## Security Considerations
-
-### Input Validation
-
-- [ ] Validate all external inputs (files, URLs, user input)
-- [ ] Sanitize strings before use in system calls
-- [ ] Implement bounds checking for numeric inputs
-- [ ] Verify file paths don't escape intended directories
-
-### Permissions
-
-- [ ] Request only necessary permissions
-- [ ] Document what permissions are needed and why
-- [ ] Handle permission denial gracefully
-- [ ] Don't assume permissions will be granted
-
-### Data Handling
-
-- [ ] Don't hardcode sensitive information
-- [ ] Encrypt sensitive data at rest if applicable
-- [ ] Clear sensitive data from memory when done
-- [ ] Log appropriately without exposing sensitive data
-
-## Pull Request Requirements
-
-### PR Title and Description
-
-- Title should be concise and descriptive: `feat(plugin_name): add new feature` or `fix(plugin_name): resolve issue with xyz`
-- Description must include:
-  - What was changed and why
-  - How to test the changes
-  - Any breaking changes
-  - References to related issues (e.g., "Closes #123")
-
-### PR Size
-
-- Keep PRs focused and reasonably sized (no 10000 line PR)
-- Large changes should be split into logical commits
-- Each commit should be self-contained and functional
-
-### Commit Message Format
-
-```
-type(scope): subject
-
-body
-
-footer
+```json
+{
+  "widget": {
+    "tooltip": "My Widget"
+  },
+  "menu": {
+    "settings": "Widget settings"
+  },
+  "settings": {
+    "message": {
+      "label": "Message",
+      "desc": "Custom message to display"
+    }
+  }
+}
 ```
 
-- **type**: feat, fix, docs, style, refactor, perf, test, chore
-- **scope**: plugin name or area affected
-- **subject**: lowercase, no period, imperative mood
-- **body**: explain the change in detail if needed
-- **footer**: reference issues, breaking changes
+Access via dot notation: `pluginApi?.tr("settings.message.label")`.
+Do **not** add fallback text after `tr()` calls — the translation system handles missing keys.
 
-### AI Disclosure
+## Code Style
 
-If substantial portions of code were AI-generated, include in the PR description:
+- **Use Noctalia widgets** (`NButton`, `NLabel`, `NBox`, `NSlider`, etc.) instead of raw Qt types (`Text`, `Rectangle`, `Button`). This ensures correct theming.
+- **Use `Style` constants** for margins, radii, colors: `Style.marginL`, `Style.radiusM`, `Color.mPrimary`
+- **Use `Logger`** for logging (`Logger.i`, `Logger.d`, `Logger.w`, `Logger.e`), not `console.log`
+- **Always null-coalesce** pluginApi access: `pluginApi?.tr(...)`, `pluginApi?.pluginSettings || ({})`
+- **camelCase** for variables/functions, **PascalCase** for component files
+- **No fallback values after `I18n.tr()` or `pluginApi?.tr()`** — the translation system returns the key on miss
 
-```markdown
-## AI-Assisted Development Note
+## Common Imports
 
-This PR includes code generated with AI assistance using [Tool Name].
-All generated code has been reviewed and tested according to our guidelines.
-
-- Generated components: [list]
-- Manual modifications: [brief summary]
+```qml
+import QtQuick
+import QtQuick.Layouts
+import Quickshell           // ShellScreen, IpcHandler
+import Quickshell.Io        // FileView, Process
+import qs.Commons           // Settings, Style, Color, Logger, I18n, Icons
+import qs.Services.UI       // PanelService, BarService
+import qs.Widgets           // N* components
 ```
 
-## Review Process for AI-Generated PRs
+## Common AI Mistakes
 
-Reviewers should:
+These are the most frequent issues in AI-generated plugin PRs:
 
-1. **Verify Functionality**: Test the implementation thoroughly
-2. **Check for Hallucinations**: Verify all API calls and library references
-3. **Performance Review**: Look for inefficiencies typical of AI code
-4. **Code Style**: Ensure consistency with existing code
-5. **Documentation**: Verify documentation is complete and accurate
-6. **Test Coverage**: Ensure adequate testing (both manual and automated)
+- **Hallucinated APIs** — inventing functions or properties that don't exist in Quickshell, Qt, or the plugin API. Always verify against official plugins before using any API.
+- **Using raw Qt types** — `Text`, `Rectangle`, `Button` instead of `NLabel`, `NBox`, `NButton`. The N* widgets handle theming automatically.
+- **Hardcoded strings** — all user-facing text must go through `pluginApi?.tr()` with translations in `i18n/`.
+- **Wrong settings pattern** — modifying `pluginApi.pluginSettings` directly in bindings instead of using edit-copy properties and saving in `saveSettings()`.
+- **Missing `saveSettings()` function** in Settings.qml — the shell calls this; without it, settings won't persist.
+- **Incorrect manifest fields** — `id` not matching folder name, missing `defaultSettings` for settings the plugin uses, wrong `minNoctaliaVersion`.
+- **Using `console.log`** instead of `Logger.i` / `Logger.d` / `Logger.w` / `Logger.e`.
+
+## Performance
+
+- **Avoid expensive property bindings** — complex calculations should be in functions, not inline bindings. Simple ternaries and property reads are fine.
+- **Use `Loader`** for heavy content that isn't always visible — panels already do this, but apply it within your own components too.
+- **Debounce rapid updates** with `Timer` — e.g. if reacting to slider changes that trigger expensive operations.
+- **Prefer signals/bindings over polling** — don't use `Timer` to repeatedly check state when a signal or binding would work.
+
+## Testing
+
+- [ ] Plugin loads and runs with `qs -c noctalia-shell`
+- [ ] Test with both light and dark themes
+- [ ] Test on target compositors (Niri, Hyprland, Sway, Labwc, MangoWC) — especially if using compositor-specific features
+- [ ] Verify settings persist across restarts
+- [ ] Check edge cases: empty states, missing data, rapid interactions
+
+## PR Checklist
+
+- [ ] Plugin tested with Noctalia Shell (`qs -c noctalia-shell`)
+- [ ] `manifest.json` is valid with all required fields
+- [ ] `id` matches folder name
+- [ ] `registry.json` is **not** included in the PR (auto-generated)
+- [ ] All user-facing strings use `pluginApi?.tr()` with translations in `i18n/`
+- [ ] Settings use the `cfg → defaults → hardcoded` fallback chain
+- [ ] `Settings.qml` exposes a `saveSettings()` function
+- [ ] No hallucinated APIs — all functions and properties verified against official plugins
+- [ ] No `console.log` — use `Logger` instead
+- [ ] Uses N* widgets, not raw Qt types
+- [ ] `preview.png` included (16:9, 960x540)
+- [ ] `README.md` included with description and features
+
+## Pull Requests
+
+**Title format:** `type(plugin-name): short description`
+
+```
+feat(my-plugin): add brightness control panel
+fix(timer): handle zero-duration edge case
+```
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `chore`
+
+**Description should include:**
+- What was changed and why
+- How to test the changes
+- References to related issues (e.g. "Closes #123")
 
 ## Resources
 
-- [Qt Quick Controls Documentation](https://doc.qt.io/qt-6/qtquick-controls-index.html)
-- [QML Best Practices](https://doc.qt.io/qt-6/qml-best-practices.html)
-- [Noctalia Plugins Project Guidelines](./README.md)
-- [Noctalia Development Guidelines](https://docs.noctalia.dev/development/guideline/)
-- [Noctalia Plugins Documentation](https://docs.noctalia.dev/development/plugins/overview/)
-
-## Questions?
-
-If you have questions about these guidelines, please open an issue or discuss with the maintainers.
-
----
-
-**Last Updated**: 2026-03-18
-**Maintained By**: Noctalia Development Team
+- [Official Plugins](https://github.com/noctalia-dev/noctalia-plugins) — study `hello-world` and `timer` first
+- [Plugin Documentation](https://docs.noctalia.dev/development/plugins/overview/)
+- [Development Guidelines](https://docs.noctalia.dev/development/guideline/)
+- [Noctalia Widgets](https://github.com/noctalia-dev/noctalia-shell/tree/main/Widgets) — all N* components
