@@ -9,42 +9,41 @@ Rectangle {
   property string hotkey: ""
   property bool active: false
   property color accentColor: active ? Color.mOnSurface : Color.mOnSurfaceVariant
+  property bool hasCustomContent: customLoader.sourceComponent !== null
 
   default property alias customContent: customLoader.sourceComponent
-  property bool hasCustomContent: customLoader.sourceComponent !== null
 
   signal clicked
 
-  width: contentRow.width + 14
-  height: 24
-  radius: 6
+  width: contentRow.width + Style.margin2M
+  height: Style.margin2L
+  radius: Style.radiusXXS
   color: active ? Qt.alpha(accentColor, 0.15) : Qt.alpha(Color.mOnSurface, 0.06)
-  border.width: 1
-  border.color: active ? Qt.alpha(accentColor, 0.5) : Qt.alpha(Color.mOutline, 0.3)
+  border.width: Style.borderS
+  border.color: active ? Qt.alpha(accentColor, Style.opacityMedium) : Qt.alpha(Color.mOutline, 0.3)
 
   Row {
     id: contentRow
+
     anchors.centerIn: parent
-    spacing: 4
+    spacing: Style.marginXS
 
     Text {
       visible: !root.hasCustomContent && root.icon !== ""
-
       anchors.verticalCenter: parent.verticalCenter
       text: root.icon
       color: root.accentColor
       font.family: "Material Symbols Outlined"
-      font.pixelSize: 12
+      font.pixelSize: Style.fontSizeS
     }
 
     Text {
       visible: !root.hasCustomContent && root.label !== ""
-
       anchors.verticalCenter: parent.verticalCenter
       text: root.label
       color: root.accentColor
       font.family: Settings.data.ui.fontDefault
-      font.pixelSize: 10
+      font.pixelSize: Style.fontSizeS
     }
 
     Loader {
@@ -56,20 +55,18 @@ Rectangle {
 
     Rectangle {
       visible: root.hotkey !== ""
-
-      width: 14
-      height: 14
-      radius: 3
+      width: Style.marginL
+      height: Style.marginL
+      radius: Style.radiusXXXS
       anchors.verticalCenter: parent.verticalCenter
       color: Qt.alpha(root.accentColor, root.active ? 0.2 : 0.06)
 
       Text {
         anchors.centerIn: parent
         text: root.hotkey
-        color: Qt.alpha(root.accentColor, root.active ? 1 : 0.7)
-
+        color: Qt.alpha(root.accentColor, root.active ? Style.opacityFull : Style.opacityHeavy)
         font.family: Settings.data.ui.fontDefault
-        font.pixelSize: 8
+        font.pixelSize: Style.fontSizeXXS
         font.bold: true
       }
     }
@@ -83,12 +80,13 @@ Rectangle {
 
   Behavior on color {
     ColorAnimation {
-      duration: 200
+      duration: Style.animationFast
     }
   }
+
   Behavior on border.color {
     ColorAnimation {
-      duration: 200
+      duration: Style.animationFast
     }
   }
 }

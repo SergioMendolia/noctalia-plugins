@@ -10,32 +10,31 @@ Rectangle {
   property color textColor: Color.mOnSurface
   property color iconColor: Color.mPrimary
   property color backgroundColor: Color.mSurface
-  property real fontSize: 12
+  property real fontSize: Style.fontSizeS
 
-  width: badgeRow.implicitWidth + 12
-  height: badgeRow.implicitHeight + 8
+  width: badgeRow.implicitWidth + Style.margin2S
+  height: badgeRow.implicitHeight + Style.margin2XS
   color: root.backgroundColor
-  radius: 8
+  radius: Style.radiusXS
   z: 10
 
   Row {
     id: badgeRow
 
     anchors.centerIn: parent
-    spacing: 5
+    spacing: Style.marginS
 
     Text {
       visible: root.icon
-
       anchors.verticalCenter: parent.verticalCenter
       text: root.icon
       color: root.iconColor
       font.family: "Material Symbols Outlined"
       font.pixelSize: root.fontSize
     }
+
     Text {
       visible: root.text
-
       anchors.verticalCenter: parent.verticalCenter
       text: root.text
       color: root.textColor

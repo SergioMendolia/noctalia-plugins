@@ -1,3 +1,4 @@
+import qs.Commons
 import QtQuick
 
 Item {
@@ -15,13 +16,11 @@ Item {
   property int currentIndex: 0
   property int visibleCount: cardsShown
   property int halfVisible: Math.floor(visibleCount / 2)
-
   property real contentHeight: contentHeight2 / 1.25 - topBarHeight
   property real centerWidth: width / 3
   property real stripWidth: cardStripWidth
   property real stripGap: cardSpacing
   property real centerX: width / 2 - centerWidth / 2
-
   property real runningIndex: 0
   property real animationIndex: 0
 
@@ -37,7 +36,6 @@ Item {
   function slotToX(slot) {
     if (slot >= 0 && slot <= 1)
       return centerX * (1 - slot) + (centerX + centerWidth + stripGap) * slot;
-
     if (slot >= -1 && slot < 0)
       return centerX * (1 + slot) + (centerX - stripGap - stripWidth) * -slot;
 
@@ -61,7 +59,6 @@ Item {
 
   function randomJump() {
     var rnd = Math.floor(Math.random() * filteredCount);
-
     if (rnd === currentIndex)
       rnd = (rnd + 1) % filteredCount;
     navigateTo(rnd);
@@ -70,7 +67,6 @@ Item {
   function navigateTo(idx) {
     var newIdx = wrappedIndex(idx);
     var diff = 0;
-
     if (filteredCount > 0) {
       diff = newIdx - currentIndex;
       var half = filteredCount / 2;
@@ -124,7 +120,7 @@ Item {
 
   Behavior on animationIndex {
     NumberAnimation {
-      duration: 300
+      duration: Style.animationNormal
       easing.type: Easing.OutBack
       easing.overshoot: 1
     }

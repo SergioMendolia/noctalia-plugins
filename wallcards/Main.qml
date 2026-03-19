@@ -25,7 +25,9 @@ Item {
   function openWindow() {
     if (window === null)
       window = Qt.createComponent("WallcardsWindow.qml").createObject(root, {
-        pluginApi: Qt.binding(function() { return root.pluginApi })
+        pluginApi: Qt.binding(function () {
+          return root.pluginApi;
+        })
       });
 
     window.visible = true;

@@ -52,6 +52,10 @@ PanelWindow {
   property var topBarRadius: cfg.top_bar_radius || defaults.top_bar_radius
   property string wallpaperDir: Settings.data.wallpaper.directory
 
+  property real opactiyTuning:
+  property real roundingTuning:
+  property real fontSizeTuning:
+
   property bool loading: true
   property string loadingMessage
   property int pendingProcesses: 0
@@ -202,20 +206,20 @@ PanelWindow {
     anchors.horizontalCenter: parent.horizontalCenter
     z: 200
     visible: root.loading
-    width: loadingRow.width + 24
-    height: loadingRow.height + 12
-    radius: 8
+    width: loadingRow.width + Style.margin2L
+    height: loadingRow.height + Style.margin2S
+    radius: Style.radiusXS
     color: Qt.alpha(Color.mSurface, 0.9)
 
     Row {
       id: loadingRow
 
       anchors.centerIn: parent
-      spacing: 10
+      spacing: Style.marginM
 
       Item {
-        width: 16
-        height: 16
+        width: Style.fontSizeXL
+        height: Style.fontSizeXL
         anchors.verticalCenter: parent.verticalCenter
 
         Repeater {
@@ -224,12 +228,12 @@ PanelWindow {
           Rectangle {
             property real angle: index * (2 * Math.PI / 3)
 
-            width: 4
-            height: 4
-            radius: 2
+            width: Style.marginXS
+            height: Style.marginXS
+            radius: Style.marginXXS
             color: Color.mPrimary
-            x: 6 + 5 * Math.cos(angle + spinAnimation.value)
-            y: 6 + 5 * Math.sin(angle + spinAnimation.value)
+            x: Style.marginS + Style.marginS * Math.cos(angle + spinAnimation.value)
+            y: Style.marginS + Style.marginS * Math.sin(angle + spinAnimation.value)
 
             NumberAnimation on opacity {
               from: 0.3
@@ -261,7 +265,7 @@ PanelWindow {
         text: root.loadingMessage
         color: Color.mOnSurface
         font.family: Settings.data.ui.fontDefault
-        font.pixelSize: 16
+        font.pixelSize: Style.fontSizeXL
       }
     }
   }
@@ -310,18 +314,18 @@ PanelWindow {
       x: leftEdge + entryOffset
       width: rightEdge - leftEdge
       height: topBarHeight
-      radius: topBarRadius || 10
+      radius: topBarRadius || Style.radiusS
 
       // Left
       Text {
         anchors.left: parent.left
-        anchors.leftMargin: 14
+        anchors.leftMargin: Style.marginL
         anchors.verticalCenter: parent.verticalCenter
         text: `${cardStack.currentIndex + 1} / ${root.filteredCount}`
         color: Color.mPrimary
         font {
           family: Settings.data.ui.fontDefault
-          pixelSize: 13
+          pixelSize: Style.fontSizeL
           letterSpacing: 0.5
         }
       }
@@ -329,7 +333,7 @@ PanelWindow {
       // Center
       Row {
         anchors.centerIn: parent
-        spacing: 3
+        spacing: Style.marginXXXS
 
         Repeater {
           model: [
@@ -367,9 +371,9 @@ PanelWindow {
       // Right
       Row {
         anchors.right: parent.right
-        anchors.rightMargin: 12
+        anchors.rightMargin: Style.marginL
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 4
+        spacing: Style.marginXS
 
         ToolbarButton {
           icon: "\ue043"
@@ -387,7 +391,7 @@ PanelWindow {
 
           Component {
             Row {
-              spacing: 5
+              spacing: Style.marginS
               PulsingDot {
                 pulsing: root.livePreview
               }
@@ -397,7 +401,7 @@ PanelWindow {
                 color: liveBtn.accentColor
                 font {
                   family: Settings.data.ui.fontDefault
-                  pixelSize: 10
+                  pixelSize: Style.fontSizeS
                 }
               }
             }
@@ -474,15 +478,13 @@ PanelWindow {
           }
 
           onModelIndexChanged: {
-              var newSource = root.filteredCount > 0
-                  ? `file://${cacheDir}/${utils.thumbnailName(root.getFileName(modelIndex))}`
-                  : "";
-              if (img.source.toString() !== newSource) {
-                  imgOld.source = img.source;
-                  imgOld.opacity = 1;
-                  crossfade.restart();
-                  img.source = newSource;
-              }
+            var newSource = root.filteredCount > 0 ? `file://${cacheDir}/${utils.thumbnailName(root.getFileName(modelIndex))}` : "";
+            if (img.source.toString() !== newSource) {
+              imgOld.source = img.source;
+              imgOld.opacity = 1;
+              crossfade.restart();
+              img.source = newSource;
+            }
           }
 
           // TODO: Needed for smooth transition, but I am not sure if it could be done without.
@@ -552,7 +554,7 @@ PanelWindow {
               property: "opacity"
               from: 1
               to: 0
-              duration: 300
+              duration: Style.animationNormal
               easing.type: Easing.OutCubic
             }
 
@@ -635,7 +637,7 @@ PanelWindow {
                     property: "opacity"
                     from: 0
                     to: 1
-                    duration: 300
+                    duration: Style.animationNormal
                     easing.type: Easing.OutCubic
                   }
 
@@ -658,7 +660,7 @@ PanelWindow {
               anchors.fill: parent
               radius: cardRadius
               color: "transparent"
-              border.width: isCenter ? 2 : 1
+              border.width: isCenter ? Style.borderM : Style.borderS
               border.color: isCenter ? Color.mOutline : Color.mSurface
               z: 20
               opacity: 1
@@ -674,7 +676,7 @@ PanelWindow {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1000
+                duration: Style.animationSlowest
                 easing.type: Easing.OutCubic
               }
             }
@@ -683,8 +685,8 @@ PanelWindow {
           Badge {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 8
-            anchors.rightMargin: 8
+            anchors.topMargin: Style.marginXS
+            anchors.rightMargin: Style.marginXS
             visible: cardDelegate.currentFileName !== ""
             icon: cardDelegate.isVideoFile ? "videocam" : "insert_drive_file"
             text: cardDelegate.currentFileName.split('.').pop().toUpperCase()
@@ -693,8 +695,8 @@ PanelWindow {
           Badge {
             anchors.top: parent.top
             anchors.left: parent.left
-            anchors.topMargin: 8
-            anchors.leftMargin: 8
+            anchors.topMargin: Style.marginXS
+            anchors.leftMargin: Style.marginXS
             visible: isCenter
             text: cardDelegate.currentFileName.substring(0, cardDelegate.currentFileName.lastIndexOf('.'))
           }
@@ -702,7 +704,7 @@ PanelWindow {
           Badge {
             anchors.top: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 10
+            anchors.topMargin: Style.marginM
             textColor: Color.mError
             visible: isCenter && cardDelegate.isVideoFile
             icon: "stop_circle"

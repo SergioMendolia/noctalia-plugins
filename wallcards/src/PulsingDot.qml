@@ -8,24 +8,24 @@ Rectangle {
   property color dotColor: Color.mTertiary
 
   anchors.verticalCenter: parent.verticalCenter
-  width: 6
-  height: 6
-  radius: 3
-  color: pulsing ? dotColor : Qt.alpha(Color.mOnSurfaceVariant, 0.4)
+  width: Style.marginS
+  height: Style.marginS
+  radius: Style.marginXXXS
+  color: pulsing ? dotColor : Qt.alpha(Color.mOnSurfaceVariant, Style.opacityLight)
 
   SequentialAnimation on opacity {
     running: root.pulsing
     loops: Animation.Infinite
 
     NumberAnimation {
-      to: 0.4
-      duration: 800
+      to: Style.opacityLight
+      duration: Style.animationSlowest
       easing.type: Easing.InOutSine
     }
 
     NumberAnimation {
-      to: 1.0
-      duration: 800
+      to: Style.opacityFull
+      duration: Style.animationSlowest
       easing.type: Easing.InOutSine
     }
   }
