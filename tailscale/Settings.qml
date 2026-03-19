@@ -59,13 +59,13 @@ ColumnLayout {
 
   // Title section
   NText {
-    text: pluginApi?.tr("settings.title") || "Tailscale Settings"
+    text: pluginApi?.tr("settings.title")
     font.pointSize: Style.fontSizeXL
     font.bold: true
   }
 
   NText {
-    text: pluginApi?.tr("settings.description") || "Configure Tailscale status display and behavior"
+    text: pluginApi?.tr("settings.description")
     color: Color.mSecondary
     Layout.fillWidth: true
     wrapMode: Text.Wrap
@@ -79,8 +79,8 @@ ColumnLayout {
   }
 
   NLabel {
-    label: pluginApi?.tr("settings.refresh-interval") || "Refresh Interval"
-    description: (pluginApi?.tr("settings.refresh-interval-desc") || "How often to check Tailscale status") + " (" + root.editRefreshInterval + " ms)"
+    label: pluginApi?.tr("settings.refresh-interval")
+    description: pluginApi?.tr("settings.refresh-interval-desc") + " (" + root.editRefreshInterval + " ms)"
   }
 
   NSlider {
@@ -100,13 +100,13 @@ ColumnLayout {
   }
 
   NLabel {
-    label: pluginApi?.tr("settings.display-options") || "Display Options"
+    label: pluginApi?.tr("settings.display-options")
   }
 
   NToggle {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.compact-mode") || "Compact Mode"
-    description: pluginApi?.tr("settings.compact-mode-desc") || "Show only icon in the bar"
+    label: pluginApi?.tr("settings.compact-mode")
+    description: pluginApi?.tr("settings.compact-mode-desc")
     checked: root.editCompactMode
     onToggled: checked => {
       root.editCompactMode = checked
@@ -119,8 +119,8 @@ ColumnLayout {
 
   NToggle {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.show-ip") || "Show IP Address"
-    description: pluginApi?.tr("settings.show-ip-desc") || "Display Tailscale IP in the bar widget"
+    label: pluginApi?.tr("settings.show-ip")
+    description: pluginApi?.tr("settings.show-ip-desc")
     checked: root.editShowIpAddress
     enabled: !root.editCompactMode
     onToggled: checked => {
@@ -135,8 +135,8 @@ ColumnLayout {
 
   NToggle {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.show-peers") || "Show Peer Count"
-    description: pluginApi?.tr("settings.show-peers-desc") || "Display connected device count in the bar"
+    label: pluginApi?.tr("settings.show-peers")
+    description: pluginApi?.tr("settings.show-peers-desc")
     checked: root.editShowPeerCount
     enabled: !root.editCompactMode
     onToggled: checked => {
@@ -151,16 +151,16 @@ ColumnLayout {
 
   NToggle {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.hide-disconnected") || "Hide Disconnected Peers"
-    description: pluginApi?.tr("settings.hide-disconnected-desc") || "Only show online peers in the panel"
+    label: pluginApi?.tr("settings.hide-disconnected")
+    description: pluginApi?.tr("settings.hide-disconnected-desc")
     checked: root.editHideDisconnected
     onToggled: checked => root.editHideDisconnected = checked
   }
 
   NToggle {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.hide-mullvad-exit-nodes") || "Hide Mullvad Exit Nodes"
-    description: pluginApi?.tr("settings.hide-mullvad-exit-nodes-desc") || "Hide Mullvad VPN exit nodes from the peer list"
+    label: pluginApi?.tr("settings.hide-mullvad-exit-nodes")
+    description: pluginApi?.tr("settings.hide-mullvad-exit-nodes-desc")
     checked: root.editHideMullvadExitNodes
     onToggled: checked => root.editHideMullvadExitNodes = checked
   }
@@ -173,21 +173,21 @@ ColumnLayout {
   }
 
   NLabel {
-    label: pluginApi?.tr("settings.terminal") || "Terminal Configuration"
+    label: pluginApi?.tr("settings.terminal")
   }
 
   NTextInput {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.terminal-command") || "Terminal Command"
-    description: pluginApi?.tr("settings.terminal-command-desc") || "Command to launch terminal for SSH/ping (e.g., 'ghostty', 'alacritty', 'kitty')"
+    label: pluginApi?.tr("settings.terminal-command")
+    description: pluginApi?.tr("settings.terminal-command-desc")
     placeholderText: "ghostty"
     text: root.editTerminalCommand
     onTextChanged: root.editTerminalCommand = text
   }
 
   NLabel {
-    label: pluginApi?.tr("settings.ping-count") || "Ping Count"
-    description: (pluginApi?.tr("settings.ping-count-desc") || "Number of ping packets to send when testing connectivity") + " (" + root.editPingCount + ")"
+    label: pluginApi?.tr("settings.ping-count")
+    description: pluginApi?.tr("settings.ping-count-desc") + " (" + root.editPingCount + ")"
   }
 
   NSlider {
@@ -207,18 +207,18 @@ ColumnLayout {
   }
 
   NLabel {
-    label: pluginApi?.tr("settings.peer-action") || "Peer Click Action"
+    label: pluginApi?.tr("settings.peer-action")
   }
 
   NComboBox {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.default-peer-action") || "Default Action"
-    description: pluginApi?.tr("settings.default-peer-action-desc") || "Action when clicking on a peer in the panel"
+    label: pluginApi?.tr("settings.default-peer-action")
+    description: pluginApi?.tr("settings.default-peer-action-desc")
 
     model: [
-      { key: "copy-ip", name: pluginApi?.tr("context.copy-ip") || "Copy IP" },
-      { key: "ssh", name: pluginApi?.tr("context.ssh") || "SSH to host" },
-      { key: "ping", name: pluginApi?.tr("context.ping") || "Ping host" }
+      { key: "copy-ip", name: pluginApi?.tr("context.copy-ip") },
+      { key: "ssh", name: pluginApi?.tr("context.ssh") },
+      { key: "ping", name: pluginApi?.tr("context.ping") }
     ]
 
     currentKey: root.editDefaultPeerAction

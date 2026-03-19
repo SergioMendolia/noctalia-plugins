@@ -146,10 +146,10 @@ Item {
     onExited: function(exitCode, exitStatus) {
       if (exitCode === 0) {
         var message = root.lastToggleAction === "connect" ?
-          pluginApi?.tr("toast.connected") || "Tailscale connected" :
-          pluginApi?.tr("toast.disconnected") || "Tailscale disconnected"
+          pluginApi?.tr("toast.connected") :
+          pluginApi?.tr("toast.disconnected")
         ToastService.showNotice(
-          pluginApi?.tr("toast.title") || "Tailscale",
+          pluginApi?.tr("toast.title"),
           message,
           "network"
         )
