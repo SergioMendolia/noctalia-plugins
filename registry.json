@@ -418,7 +418,7 @@
     {
       "id": "kde-connect",
       "name": "KDE Connect",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "official": false,
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
@@ -431,7 +431,7 @@
         "Utility",
         "System"
       ],
-      "lastUpdated": "2026-03-10T21:23:53+01:00"
+      "lastUpdated": "2026-03-21T20:15:22+01:00"
     },
     {
       "id": "keybind-cheatsheet",
