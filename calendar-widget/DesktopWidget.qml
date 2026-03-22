@@ -4,120 +4,128 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Modules.DesktopWidgets
-import qs.Widgets 
+import qs.Widgets
 
 DraggableDesktopWidget {
     id: root
     property var pluginApi: null
 
-    readonly property real _width: Math.round(300 * widgetScale)
-    readonly property real _height: Math.round(165 * widgetScale)
+    readonly property bool startOnMonday: pluginApi?.pluginSettings?.startOnMonday ?? true
     
-    implicitWidth:  _width
+    // --- Sizing ---
+    readonly property real _width: Math.round(250 * widgetScale)
+    readonly property real _height: Math.round(285 * widgetScale)
+    implicitWidth: _width
     implicitHeight: _height
 
-    // --- Data Variables ---
-    property string distroVal: "..."
-    property string kernelVal: "..."
-    property string uptimeVal: "..."
-
-    // --- Data Fetching ---
-    Process {
-        id: distroProc
-        command: ["sh", "-c", "grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '\"'"]
-        stdout: StdioCollector { 
-            onTextChanged: if (text.trim() !== "") root.distroVal = text.trim()
+    // --- Date Logic ---
+    property date currentDate: new Date()
+    
+    function refreshDate() {
+        let now = new Date();
+        if (now.getDate() !== currentDate.getDate() || 
+            now.getMonth() !== currentDate.getMonth() || 
+            now.getFullYear() !== currentDate.getFullYear()) {
+            currentDate = now;
         }
     }
 
-    Process {
-        id: kernelProc
-        command: ["uname", "-r"]
-        stdout: StdioCollector { 
-            onTextChanged: if (text.trim() !== "") root.kernelVal = text.trim()
+    // Refresh immediately on wake/visibility change
+    onVisibleChanged: if (visible) refreshDate()
+
+    Timer {
+        interval: 10000 
+        running: true
+        repeat: true
+        onTriggered: root.refreshDate()
+    }
+
+    readonly property var days: startOnMonday 
+        ? ["M", "T", "W", "T", "F", "S", "S"] 
+        : ["S", "M", "T", "W", "T", "F", "S"]
+    
+    readonly property int firstDayOffset: {
+        let firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+        if (startOnMonday) {
+            return (firstDay === 0) ? 6 : firstDay - 1;
+        } else {
+            return firstDay;
         }
     }
 
-    Process {
-        id: uptimeProc
-        command: ["sh", "-c", "awk '{d=int($1/86400); h=int(($1%86400)/3600); m=int(($1%3600)/60); if(d>0) printf \"%dd \", d; printf \"%dh %dm\", h, m}' /proc/uptime"]
-        stdout: StdioCollector {
-            onTextChanged: if (text.trim() !== "") root.uptimeVal = text.trim()
-        }
-    }
-
-    // Refresh all data on startup and uptime every minute
-    Timer { 
-        interval: 60000; running: true; repeat: true; triggeredOnStart: true
-        onTriggered: {
-            distroProc.running = true
-            kernelProc.running = true
-            uptimeProc.running = true
-        }
+    readonly property int daysInMonth: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
+    
+    function isToday(dayNum) {
+        let now = new Date();
+        return dayNum === now.getDate() && 
+               currentDate.getMonth() === now.getMonth() && 
+               currentDate.getFullYear() === now.getFullYear();
     }
 
     // --- UI Layout ---
     Rectangle {
         anchors.fill: parent
-        color: Color.mSurface
+        color: Color.mSurface 
         opacity: 0.85
-        radius: Style.radiusM 
+        radius: Style.radiusM
+        border.color: Color.mOutlineVariant
+        border.width: 1
 
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: Style.marginL
             spacing: Style.marginS
 
+            NText {
+                text: currentDate.toLocaleDateString(Qt.locale(), "MMMM yyyy").toUpperCase()
+                color: Color.mPrimary 
+                font.bold: true
+                font.letterSpacing: 1.2
+                font.pointSize: Style.fontSizeM
+                Layout.alignment: Qt.AlignHCenter
+                Layout.bottomMargin: Style.marginS
+            }
+
             GridLayout {
-                columns: 2
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
+                columns: 7
                 rowSpacing: Style.marginS
+                columnSpacing: Style.marginS
+                Layout.fillWidth: true
 
-                // Row 1: Distribution
-                NText { 
-                    text: pluginApi?.tr("widget.distribution") ?? "Distribution"
-                    color: Color.mOnSurfaceVariant
-                    font.pointSize: Style.fontSizeL * widgetScale
-                }
-                NText { 
-                    text: root.distroVal
-                    color: Color.mOnSurface
-                    font.bold: true
-                    font.pointSize: Style.fontSizeL * widgetScale
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignRight 
-                }
-
-                // Row 2: Kernel
-                NText { 
-                    text: pluginApi?.tr("widget.kernel") ?? "Kernel"
-                    color: Color.mOnSurfaceVariant
-                    font.pointSize: Style.fontSizeL * widgetScale
-                }
-                NText { 
-                    text: root.kernelVal
-                    color: Color.mOnSurface
-                    font.bold: true
-                    font.pointSize: Style.fontSizeL * widgetScale
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignRight
-                    elide: Text.ElideRight
+                Repeater {
+                    model: root.days
+                    NText {
+                        text: modelData
+                        color: Color.mOnSurfaceVariant
+                        font.bold: true
+                        font.pointSize: Style.fontSizeS
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                    }
                 }
 
-                // Row 3: Uptime
-                NText { 
-                    text: pluginApi?.tr("widget.uptime") ?? "Uptime"
-                    color: Color.mOnSurfaceVariant
-                    font.pointSize: Style.fontSizeL * widgetScale
+                Repeater {
+                    model: root.firstDayOffset
+                    Item { Layout.preferredWidth: 20 * widgetScale; Layout.preferredHeight: 20 * widgetScale }
                 }
-                NText { 
-                    text: root.uptimeVal
-                    color: Color.mOnSurface
-                    font.bold: true
-                    font.pointSize: Style.fontSizeL * widgetScale
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignRight 
+
+                Repeater {
+                    model: root.daysInMonth
+                    Rectangle {
+                        readonly property int dayNum: index + 1
+                        readonly property bool highlight: root.isToday(dayNum)
+                        Layout.preferredWidth: 28 * widgetScale
+                        Layout.preferredHeight: 28 * widgetScale
+                        color: highlight ? Color.mPrimary : "transparent"
+                        radius: Style.radiusS
+                        NText {
+                            anchors.centerIn: parent
+                            text: dayNum
+                            color: highlight ? Color.mOnPrimary : Color.mOnSurface
+                            font.bold: highlight
+                            font.pointSize: Style.fontSizeS
+                        }
+                    }
                 }
             }
         }
