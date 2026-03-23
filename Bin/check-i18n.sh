@@ -51,7 +51,7 @@ while IFS= read -r en_file; do
         en_lines=$(wc -l < "$en_file")
         target_lines=$(wc -l < "$target_file")
         diff=$(( target_lines - en_lines))
-        if [ "$diff" -lt 0 ]; then
+        if [ "$diff" -ne 0 ]; then
           ((mismatch_count++))
           mismatch_plugins+=("$plugin_name (diff: ${diff})")
         fi
