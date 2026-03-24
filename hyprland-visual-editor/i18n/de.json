@@ -19,6 +19,10 @@
     }
   },
   "welcome": {
+    "toast": {
+    "enabled": "Visueller Editor aktiviert",
+    "disabled": "Visueller Editor deaktiviert"
+    },
     "activation_title": "Systemaktivierung",
     "system_active": "Das System ist betriebsbereit. Visuelle Effekte werden sicher von HVE verwaltet.",
     "system_inactive": "System gestoppt. Erfordert die Annahme des Persistenzvertrags, um fortzufahren.",

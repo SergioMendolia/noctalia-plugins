@@ -19,6 +19,10 @@
     }
   },
   "welcome": {
+    "toast": {
+      "enabled": "Editor Visual Ativado",
+      "disabled": "Editor Visual Desativado"
+    },
     "activation_title": "Ativação do Sistema",
     "system_active": "O sistema está operacional. Os efeitos visuais são geridos com segurança pelo HVE.",
     "system_inactive": "Sistema parado. Requer a aceitação do contrato de persistência para continuar.",
@@ -233,5 +237,15 @@
         "desc": "Equilíbrio entre correção e estilo."
       }
     }
+  },
+  "settings": {
+  "path": {
+    "label": "Caminho de Configuração",
+    "desc": "Caminho absoluto para o arquivo de configuração satélite."
+  },
+  "autoapply": {
+    "label": "Aplicar Automaticamente",
+    "desc": "Recarregar o Hyprland automaticamente quando as configurações mudarem."
+  }
   }
 }

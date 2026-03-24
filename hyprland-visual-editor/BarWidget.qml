@@ -12,43 +12,37 @@ NIconButton {
   property string widgetId: ""
   property string section: ""
 
-  // --- STANDARD CONFIGURATION LOGIC ---
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   readonly property string iconColorKey: cfg.iconColor ?? defaults.iconColor ?? "onSurface"
 
-  // --- PLUGIN DATA ---
   icon: "adjustments-horizontal"
-  tooltipText: pluginApi?.tr("widget.tooltip") || "Hyprland Visual Editor"
+  tooltipText: pluginApi?.tr("widget.tooltip")
 
-  // --- SYSTEM STYLES ---
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   
-
-  customRadius: Style.radiusL 
+  customRadius: Style.radiusM 
 
   colorBg: Style.capsuleColor
   colorFg: Color.resolveColorKey(iconColorKey)
 
   border.color: Style.capsuleBorderColor
-  border.width: Style.capsuleBorderWidth
+  border.width: 1 * Style.uiScaleRatio
 
-  // --- INTERACTION ---
   onClicked: {
     if (pluginApi) {
       pluginApi.openPanel(root.screen, this);
     }
   }
 
-  // --- STANDARD CONTEXT MENU ---
   NPopupContextMenu {
     id: contextMenu
 
     model: [
       {
-        "label": pluginApi?.tr("menu.settings") || "Settings",
+        "label": pluginApi?.tr("widget.menu_settings"),
         "action": "settings",
         "icon": "settings"
       },

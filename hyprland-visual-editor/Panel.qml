@@ -13,7 +13,7 @@ Item {
     
     property var pluginApi: null
     
-    readonly property int barHeight: 20
+    readonly property real barHeight: Style.marginXL
 
     readonly property string pluginDir: pluginApi?.pluginDir || ""
     readonly property var geometryPlaceholder: panelContainer
@@ -42,7 +42,7 @@ Item {
 
     anchors.fill: parent
 
-    Rectangle {
+    NBox {
         id: panelContainer
         anchors.fill: parent
         anchors.topMargin: root.barHeight
@@ -70,13 +70,13 @@ Item {
                     spacing: 0
                     Layout.alignment: Qt.AlignCenter
                     NText {
-                        text: pluginApi?.tr("panel.header_title") || ""
+                        text: pluginApi?.tr("panel.header_title")
                         pointSize: Style.fontSizeXL
                         font.weight: Font.Bold
                         color: Color.mPrimary
                     }
                     NText {
-                        text: pluginApi?.tr("panel.header_subtitle") || ""
+                        text: pluginApi?.tr("panel.header_subtitle")
                         pointSize: Style.fontSizeS
                         color: Color.mOnSurfaceVariant
                     }
@@ -87,31 +87,31 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: Style.marginS
 
                 TabItem {
-                    label: pluginApi?.tr("panel.tabs.home") || ""
+                    label: pluginApi?.tr("panel.tabs.home")
                     iconName: "home"
                     index: 0
                     accentColor: "#38bdf8"
                     isSelected: stackLayout.currentIndex === 0
                 }
                 TabItem {
-                    label: pluginApi?.tr("panel.tabs.animations") || ""
+                    label: pluginApi?.tr("panel.tabs.animations")
                     iconName: "movie"
                     index: 1
                     accentColor: "#fbbf24"
                     isSelected: stackLayout.currentIndex === 1
                 }
                 TabItem {
-                    label: pluginApi?.tr("panel.tabs.borders") || ""
+                    label: pluginApi?.tr("panel.tabs.borders")
                     iconName: "border-all"
                     index: 2
                     accentColor: "#10b981"
                     isSelected: stackLayout.currentIndex === 2
                 }
                 TabItem {
-                    label: pluginApi?.tr("panel.tabs.effects") || ""
+                    label: pluginApi?.tr("panel.tabs.effects")
                     iconName: "wand"
                     index: 3
                     accentColor: "#c084fc"
@@ -150,14 +150,16 @@ Item {
         property bool isSelected
 
         Layout.fillWidth: true
-        height: 40 * Style.uiScaleRatio
+        implicitHeight: tabContent.implicitHeight + (Style.marginM * 2)
         radius: Style.radiusM
 
         readonly property color currentAccent: isSelected ? Color.mPrimary : accentColor
 
-        color: isSelected ? Qt.alpha(Color.mPrimary, 0.15) : (tabMouse.containsMouse ? Qt.alpha(accentColor, 0.1) : "transparent")
-        border.width: 1
-        border.color: isSelected ? Color.mPrimary : (tabMouse.containsMouse ? accentColor : Qt.alpha(accentColor, 0.2))
+        color: isSelected ? Qt.alpha(Color.mPrimary, Style.stateOpacityActive) : (tabMouse.containsMouse ? Qt.alpha(accentColor, Style.stateOpacityHover) : "transparent")
+        
+        border.width: 1 * Style.uiScaleRatio
+        
+        border.color: isSelected ? Color.mPrimary : (tabMouse.containsMouse ? accentColor : Qt.alpha(accentColor, Style.stateOpacityHover))
 
         Behavior on color { ColorAnimation { duration: 150 } }
         Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -171,8 +173,9 @@ Item {
         }
 
         RowLayout {
+            id: tabContent
             anchors.centerIn: parent
-            spacing: 8
+            spacing: Style.marginS
 
             NIcon {
                 icon: iconName

@@ -2,7 +2,7 @@
   "meta": {
     "lang": "pl",
     "name": "English",
-    "author": "Ximo & AI (Gemini)"
+    "author": "Ximo & AI"
   },
   "widget": {
     "tooltip": "Hyprland Visual Editor",
@@ -19,6 +19,10 @@
     }
   },
   "welcome": {
+    "toast": {
+    "enabled": "Visual Editor Enabled",
+    "disabled": "Visual Editor Disabled"
+    },
     "activation_title": "System Activation",
     "system_active": "The system is operational. Visual effects are safely managed by HVE.",
     "system_inactive": "System halted. Requires acceptance of the persistence contract to continue.",
@@ -232,6 +236,16 @@
         "title": "Hybrid",
         "desc": "Balance between correction and style."
       }
+    }
+  },
+  "settings": {
+    "path": {
+      "label": "Config Path",
+      "desc": "Absolute path for the satellite configuration file."
+    },
+    "autoapply": {
+      "label": "Auto Apply",
+      "desc": "Automatically reload Hyprland when settings change."
     }
   }
 }

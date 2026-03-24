@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "description": "Elevate your Hyprland experience. A modular plugin to safely inject custom animations, borders, and visual effects on the fly.",
-  "tags": ["Panel", "Bar", "System", "Hyprland"],
+  "tags": ["Panel", "Bar", "System","Fun","Theming","Utility", "Hyprland"],
   "entryPoints": {
     "panel": "Panel.qml",
     "barWidget": "BarWidget.qml",

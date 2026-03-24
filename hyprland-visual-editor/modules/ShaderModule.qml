@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Widgets
 import qs.Commons
-import qs.Services.UI
+import qs.Services.UI 
 
 NScrollView {
     id: root
@@ -17,12 +17,13 @@ NScrollView {
 
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
+    
     property string activeShaderFile: cfg.activeShaderFile ?? defaults.activeShaderFile ?? ""
 
     Layout.fillWidth: true
     Layout.fillHeight: true
-    contentHeight: mainLayout.implicitHeight + 50
+    // Unificado: Usamos XL para el aire inferior
+    contentHeight: mainLayout.implicitHeight + Style.marginXL
     clip: true
 
     Process {
@@ -50,8 +51,8 @@ NScrollView {
         NBox {
             id: cardRoot
             Layout.fillWidth: true
-            Layout.preferredHeight: 85 * Style.uiScaleRatio
             radius: Style.radiusM
+            implicitHeight: cardRow.implicitHeight + (Style.marginL * 2)
 
             property string cTitleKey: model.title || ""
             property string cDescKey: model.desc || ""
@@ -63,7 +64,8 @@ NScrollView {
             property bool isActive: root.activeShaderFile === cFile
 
             color: isActive ? Qt.alpha(cColor, 0.12) : (hoverArea.containsMouse ? Qt.alpha(cColor, 0.05) : "transparent")
-            border.width: isActive ? 2 : 1
+            
+            border.width: (isActive ? 2 : 1) * Style.uiScaleRatio
             border.color: isActive ? cColor : (hoverArea.containsMouse ? Qt.alpha(cColor, 0.4) : Color.mOutline)
 
             Behavior on color { ColorAnimation { duration: 150 } }
@@ -74,6 +76,7 @@ NScrollView {
             }
 
             RowLayout {
+                id: cardRow
                 anchors.fill: parent; anchors.margins: Style.marginM; spacing: Style.marginM
                 NIcon {
                     icon: cardRoot.cIcon
@@ -81,21 +84,31 @@ NScrollView {
                     pointSize: Style.fontSizeL
                 }
                 ColumnLayout {
-                    Layout.fillWidth: true; spacing: 2
+                    Layout.fillWidth: true; spacing: Style.marginS
                     RowLayout {
-                        spacing: 8
+                        spacing: Style.marginS
                         NText {
-                            text: pluginApi?.tr(cardRoot.cTitleKey) || ""
+                            text: pluginApi?.tr(cardRoot.cTitleKey)
                             font.weight: Font.Bold
                             color: cardRoot.isActive ? Color.mOnSurface : Color.mOnSurfaceVariant
                         }
                         NBox {
-                            width: tagT.implicitWidth + 10; height: 16; radius: 4; color: Qt.alpha(cardRoot.cColor, 0.15)
-                            NText { id: tagT; text: cardRoot.cTag; pointSize: 7; color: cardRoot.cColor; anchors.centerIn: parent; font.weight: Font.Bold }
+                            width: tagT.implicitWidth + Style.marginM
+                            height: tagT.implicitHeight + Style.marginXS
+                            radius: Style.radiusS
+                            color: Qt.alpha(cardRoot.cColor, 0.15)
+                            NText { 
+                                id: tagT
+                                text: cardRoot.cTag
+                                pointSize: Style.fontSizeS * 0.7
+                                color: cardRoot.cColor
+                                anchors.centerIn: parent
+                                font.weight: Font.Bold 
+                            }
                         }
                     }
                     NText {
-                        text: pluginApi?.tr(cardRoot.cDescKey) || ""
+                        text: pluginApi?.tr(cardRoot.cDescKey)
                         pointSize: Style.fontSizeS; color: Color.mOnSurfaceVariant; elide: Text.ElideRight; Layout.fillWidth: true
                     }
                 }
@@ -131,13 +144,13 @@ NScrollView {
         Layout.margins: Style.marginM
 
         ColumnLayout {
-            Layout.fillWidth: true; spacing: 4; Layout.margins: Style.marginL
+            Layout.fillWidth: true; spacing: Style.marginS; Layout.margins: Style.marginL
             NText {
-                text: pluginApi?.tr("shaders.header_title") || ""
+                text: pluginApi?.tr("shaders.header_title")
                 font.weight: Font.Bold; pointSize: Style.fontSizeL; color: Color.mPrimary
             }
             NText {
-                text: pluginApi?.tr("shaders.header_subtitle") || ""
+                text: pluginApi?.tr("shaders.header_subtitle")
                 pointSize: Style.fontSizeS; color: Color.mOnSurfaceVariant
             }
         }

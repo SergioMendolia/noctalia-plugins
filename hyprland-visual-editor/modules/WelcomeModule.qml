@@ -22,7 +22,8 @@ NScrollView {
 
     Layout.fillWidth: true
     Layout.fillHeight: true
-    contentHeight: mainLayout.implicitHeight + 100
+    // Cambiado 100 por margen dinámico
+    contentHeight: mainLayout.implicitHeight + (Style.marginXL * 2)
     clip: true
 
     ColumnLayout {
@@ -50,12 +51,12 @@ NScrollView {
         NDivider { Layout.fillWidth: true }
 
         ProCard {
-            title: pluginApi?.tr("welcome.activation_title") || ""
+            title: pluginApi?.tr("welcome.activation_title")
             iconName: "power"
-            accentColor: root.isSystemActive ? Color.mPrimary : "#ef4444"
+            accentColor: root.isSystemActive ? Color.mPrimary : Color.mError
             description: root.isSystemActive
-                ? (pluginApi?.tr("welcome.system_active") || "")
-                : (pluginApi?.tr("welcome.system_inactive") || "")
+                ? (pluginApi?.tr("welcome.system_active"))
+                : (pluginApi?.tr("welcome.system_inactive"))
 
             extraContent: ColumnLayout {
                 spacing: Style.marginM
@@ -63,9 +64,9 @@ NScrollView {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.margins: 15
+                    Layout.margins: Style.marginM
                     NText {
-                        text: pluginApi?.tr("welcome.enable_label") || ""
+                        text: pluginApi?.tr("welcome.enable_label")
                         font.weight: Font.Bold
                         pointSize: Style.fontSizeL
                         color: Color.mOnSurface
@@ -80,7 +81,7 @@ NScrollView {
                             if (pluginApi) {
                                 pluginApi.pluginSettings.isSystemActive = newState
                                 pluginApi.saveSettings()
-                                var statusMsg = newState ? "Visual Editor Enabled" : "Visual Editor Disabled"
+                                var statusMsg = newState ? pluginApi?.tr("welcome.toast.enabled") : pluginApi?.tr("welcome.toast.disabled")
                                 ToastService.showNotice(statusMsg)
                             }
 
@@ -88,7 +89,7 @@ NScrollView {
                                 runScript("init.sh", newState ? "enable" : "disable")
                             }
                             
-                            isSystemActive = newState
+                            root.isSystemActive = newState
                         }
                     }
                 }
@@ -96,23 +97,23 @@ NScrollView {
                 NBox {
                     visible: !root.isSystemActive
                     Layout.fillWidth: true
-                    implicitHeight: warnCol.implicitHeight + 24
-                    color: Qt.alpha("#ef4444", 0.08)
+                    implicitHeight: warnCol.implicitHeight + (Style.marginM * 2)
+                    color: Qt.alpha(Color.mError, 0.08)
                     radius: Style.radiusM
-                    border.color: Qt.alpha("#ef4444", 0.3)
-                    border.width: 1
+                    border.color: Qt.alpha(Color.mError, 0.3)
+                    border.width: 1 * Style.uiScaleRatio
                     RowLayout {
                         id: warnCol
-                        anchors.fill: parent; anchors.margins: 12; spacing: 12
-                        NIcon { icon: "alert-circle"; color: "#ef4444"; pointSize: 20; Layout.alignment: Qt.AlignTop }
+                        anchors.fill: parent; anchors.margins: Style.marginM; spacing: Style.marginM
+                        NIcon { icon: "alert-circle"; color: Color.mError; pointSize: Style.fontSizeXL; Layout.alignment: Qt.AlignTop }
                         ColumnLayout {
-                            Layout.fillWidth: true; spacing: 4
+                            Layout.fillWidth: true; spacing: Style.marginXS
                             NText {
-                                text: pluginApi?.tr("welcome.warning.title") || ""
-                                font.weight: Font.Bold; color: "#ef4444"; pointSize: Style.fontSizeS
+                                text: pluginApi?.tr("welcome.warning.title")
+                                font.weight: Font.Bold; color: Color.mError; pointSize: Style.fontSizeS
                             }
                             NText {
-                                text: pluginApi?.tr("welcome.warning.text") || ""
+                                text: pluginApi?.tr("welcome.warning.text")
                                 color: Color.mOnSurfaceVariant; wrapMode: Text.WordWrap; textFormat: Text.RichText; Layout.fillWidth: true; pointSize: Style.fontSizeS
                             }
                         }
@@ -122,11 +123,11 @@ NScrollView {
         }
 
         ProCard {
-            title: pluginApi?.tr("welcome.features.title") || ""
-            iconName: "star"; accentColor: "#fbbf24"
-            description: pluginApi?.tr("welcome.features.description") || ""
+            title: pluginApi?.tr("welcome.features.title")
+            iconName: "star"; accentColor: Color.mTertiary
+            description: pluginApi?.tr("welcome.features.description")
             extraContent: ColumnLayout {
-                spacing: 6
+                spacing: Style.marginXS
                 Repeater {
                     model: [
                         "welcome.features.list.fluid_anim",
@@ -135,33 +136,33 @@ NScrollView {
                         "welcome.features.list.non_destructive"
                     ]
                     delegate: RowLayout {
-                        spacing: 8
-                        NIcon { icon: "check"; color: Color.mPrimary; pointSize: 12 }
-                        NText { text: pluginApi?.tr(modelData) || ""; color: Color.mOnSurfaceVariant; pointSize: 10; textFormat: Text.RichText }
+                        spacing: Style.marginS
+                        NIcon { icon: "check"; color: Color.mPrimary; pointSize: Style.fontSizeM }
+                        NText { text: pluginApi?.tr(modelData); color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeS; textFormat: Text.RichText }
                     }
                 }
             }
         }
         
         ProCard {
-            title: pluginApi?.tr("welcome.docs.title") || ""
-            iconName: "book"; accentColor: "#38bdf8"
-            description: pluginApi?.tr("welcome.docs.description") || ""
+            title: pluginApi?.tr("welcome.docs.title")
+            iconName: "book"; accentColor: Color.mSecondary
+            description: pluginApi?.tr("welcome.docs.description")
             extraContent: ColumnLayout {
-                spacing: 15
+                spacing: Style.marginL
                 NText {
-                    Layout.fillWidth: true; wrapMode: Text.Wrap; color: "#a9b1d6"; font.pointSize: 10; textFormat: Text.RichText
-                    text: pluginApi?.tr("welcome.docs.summary") || ""
+                    Layout.fillWidth: true; wrapMode: Text.Wrap; color: Color.mOnSurfaceVariant; font.pointSize: Style.fontSizeS; textFormat: Text.RichText
+                    text: pluginApi?.tr("welcome.docs.summary")
                 }
                 RowLayout {
-                    spacing: 10; Layout.fillWidth: true
+                    spacing: Style.marginM; Layout.fillWidth: true
                     NButton {
-                        text: pluginApi?.tr("welcome.docs.btn_readme") || ""
+                        text: pluginApi?.tr("welcome.docs.btn_readme")
                         icon: "external-link"; Layout.fillWidth: true
                         onClicked: Qt.openUrlExternally("file://" + pluginDir + "/README.md")
                     }
                     NButton {
-                        text: pluginApi?.tr("welcome.docs.btn_folder") || ""
+                        text: pluginApi?.tr("welcome.docs.btn_folder")
                         icon: "folder"; Layout.fillWidth: true
                         onClicked: Qt.openUrlExternally("file://" + pluginDir + "/")
                     }
@@ -170,13 +171,13 @@ NScrollView {
         }
 
         ProCard {
-            title: pluginApi?.tr("welcome.credits.title") || ""
-            iconName: "heart"; accentColor: "#f472b6"
-            description: pluginApi?.tr("welcome.credits.description") || ""
+            title: pluginApi?.tr("welcome.credits.title")
+            iconName: "heart"; accentColor: Color.mOutline
+            description: pluginApi?.tr("welcome.credits.description")
             extraContent: ColumnLayout {
                 spacing: Style.marginM
                 NButton {
-                    text: pluginApi?.tr("welcome.credits.btn_hyde") || ""
+                    text: pluginApi?.tr("welcome.credits.btn_hyde")
                     icon: "brand-github"; Layout.fillWidth: true
                     onClicked: Qt.openUrlExternally("https://github.com/HyDE-Project/")
                 }
@@ -185,17 +186,16 @@ NScrollView {
                     spacing: Style.marginM
                     NIcon { icon: "code"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeL }
                     ColumnLayout {
-                        spacing: 2
-                        NText { text: pluginApi?.tr("welcome.credits.ai_title") || ""; font.weight: Font.Bold }
+                        spacing: Style.marginXS
+                        NText { text: pluginApi?.tr("welcome.credits.ai_title"); font.weight: Font.Bold }
                         NText {
-                            text: pluginApi?.tr("welcome.credits.ai_desc") || ""
+                            text: pluginApi?.tr("welcome.credits.ai_desc")
                             color: Color.mOnSurfaceVariant; wrapMode: Text.Wrap; Layout.fillWidth: true; pointSize: Style.fontSizeS
                         }
                     }
                 }
             }
         }
-        Item { Layout.preferredHeight: 50 }
     }
 
     component ProCard : NBox {
@@ -205,7 +205,7 @@ NScrollView {
         Layout.fillWidth: true; Layout.leftMargin: Style.marginL; Layout.rightMargin: Style.marginL
         implicitHeight: cardCol.implicitHeight + (Style.marginL * 2)
         radius: Style.radiusM
-        border.color: Qt.alpha(accentColor, 0.3); border.width: 1
+        border.color: Qt.alpha(accentColor, 0.3); border.width: 1 * Style.uiScaleRatio
         color: Qt.alpha(accentColor, 0.03)
         ColumnLayout {
             id: cardCol; anchors.fill: parent; anchors.margins: Style.marginL; spacing: Style.marginM

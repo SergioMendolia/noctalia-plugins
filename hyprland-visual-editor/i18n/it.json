@@ -19,6 +19,10 @@
     }
   },
   "welcome": {
+    "toast": {
+    "enabled": "Editor Visuale Abilitato",
+    "disabled": "Editor Visuale Disabilitato"
+    },
     "activation_title": "Attivazione del Sistema",
     "system_active": "Il sistema è operativo. Gli effetti visivi sono gestiti in sicurezza da HVE.",
     "system_inactive": "Sistema arrestato. Richiede l'accettazione del contratto di persistenza per continuare.",

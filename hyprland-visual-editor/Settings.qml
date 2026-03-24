@@ -26,8 +26,8 @@ ColumnLayout {
 
     NTextInput {
       Layout.fillWidth: true
-      label: pluginApi?.tr("settings.path.label") || ""
-      description: pluginApi?.tr("settings.path.desc") || ""
+      label: pluginApi?.tr("settings.path.label")
+      description: pluginApi?.tr("settings.path.desc")
       text: root.valueOverlayPath
       onTextChanged: root.valueOverlayPath = text
       readOnly: true
@@ -35,8 +35,8 @@ ColumnLayout {
 
     NToggle {
       Layout.fillWidth: true
-      label: pluginApi?.tr("settings.autoapply.label") || ""
-      description: pluginApi?.tr("settings.autoapply.desc") || ""
+      label: pluginApi?.tr("settings.autoapply.label")
+      description: pluginApi?.tr("settings.autoapply.desc")
       checked: root.valueAutoApply
       onToggled: root.valueAutoApply = !root.valueAutoApply
     }
