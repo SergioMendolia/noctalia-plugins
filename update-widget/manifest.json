@@ -1,0 +1,37 @@
+{
+  "id": "update-widget",
+  "name": "Update Widget",
+  "version": "1.0.0",
+  "minNoctaliaVersion": "3.6.0",
+  "author": "Ast",
+  "license": "MIT",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+  "description": "A plugin to manage updates",
+  "tags": ["Bar", "Desktop", "Panel", "System", "Utility"],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml",
+    "launcherProvider": "LauncherProvider.qml",    
+    "controlCenterWidget": "ControlCenterWidget.qml",
+    "desktopWidget": "DesktopWidget.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "nameCmd": "(checkupdates; paru -Qua;) | awk '{print $1}'",
+      "oldVerCmd": "(checkupdates; paru -Qua;) | awk '{print $2}'",
+      "newVerCmd": "(checkupdates; paru -Qua;) | awk '{print $4}'",
+      "updateCmd": "ghostty -e bash -c 'echo \"Updating System...\";paru; flatpak update; read -n 1 -p \"Press any key to exit...\"'",
+      "flatpak": true,
+      "toast": true,
+      "hideOnEmpty": false,
+      "refreshInterval": 120,
+      "desktopTip": true,
+      "refreshTimer": true
+    }
+  }
+}
